@@ -50,7 +50,7 @@
 #define SENSOR_AGARRE                               1
 #define PIN_SENSOR_PROXIMIDAD_ECHO                  6
 #define PIN_SENSOR_PROXIMIDAD_TRIGGER               7
-#define PIN_SENSOR_AGARRE                           "A0"
+#define PIN_SENSOR_AGARRE                           A0
 #define MIN_FUERZA_ACEPTADA                         50
 
 #define PIN_MOTOR                                   3
