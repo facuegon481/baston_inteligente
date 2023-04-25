@@ -24,7 +24,7 @@
         str = "-----------------------------------------------------";\
         DebugPrint(str);\
       }
-//----------------------------------------------
+//----------------------------------------------f
 
 //----------------------------------------------
 // Estado de un sensor ...
@@ -45,16 +45,16 @@
 #define UMBRAL_OBJETO_CERCANO                       20
 #define UMBRAL_OBJETO_MEDIO                         80
 
-#define MAX_CANT_SENSORES                           2
-#define SENSOR_PROXIMIDAD                           0
-#define SENSOR_AGARRE                               1
-#define PIN_SENSOR_PROXIMIDAD_ECHO                  6
-#define PIN_SENSOR_PROXIMIDAD_TRIGGER               7
-#define PIN_SENSOR_AGARRE                           A0
-#define MIN_FUERZA_ACEPTADA                         50
+const short MAX_CANT_SENSORES                          = 2;
+const short SENSOR_PROXIMIDAD                          = 0;
+const short SENSOR_AGARRE                              = 1;
+const short PIN_SENSOR_PROXIMIDAD_ECHO                 = 6;
+const short PIN_SENSOR_PROXIMIDAD_TRIGGER              = 7;
+const short PIN_SENSOR_AGARRE                          = A0;
+const short MIN_FUERZA_ACEPTADA                        = 50;
 
-#define PIN_MOTOR                                   3
-#define PIN_BUZZER                                  998
+const short PIN_MOTOR                                  = 3;
+const short PIN_BUZZER                                 = 998;
                            
 
 #define byte 255
@@ -83,6 +83,12 @@ String events_s [] = { "EV_OBJECT_NEAR"        , "EV_OBJECT_AWAY"        , "EV_G
 
 typedef void (*transition)();
 
+  void start_near ();
+  void start_grab ();
+  void none       ();
+  void stop_near  ();
+  void start_alarm();
+
 
 //VERIFICAR Y DEFINIR QUE HACE CADA UNA DE LAS ACCIONES, LA UNICA DEFINIDA ES START_ALARM
   transition state_table_actions[MAX_STATES][MAX_EVENTS] =
@@ -101,31 +107,7 @@ long distancia, duracion, dutyCicle, agarre;
 
 
 //----------------------------------------------
-void do_init()
-{
-  Serial.begin(9600);
-  
-  pinMode(PIN_SENSOR_PROXIMIDAD_ECHO, INPUT); //echo es de entrada
-  pinMode(PIN_SENSOR_PROXIMIDAD_TRIGGER, OUTPUT); //trigger es de salida
-  pinMode(PIN_MOTOR, OUTPUT); //motor es de salida
-//   pinMode(PIN_SENSOR_AGARRE, INPUT); //agarre es de entrada
-  pinMOde(PIN_BUZZER, OUTPUT); //buzzer es de salida
 
-  sensores[SENSOR_PROXIMIDAD].pin    = PIN_SENSOR_PROXIMIDAD_ECHO;
-  sensores[SENSOR_PROXIMIDAD].estado = ESTADO_SENSOR_OK;
-
-  sensores[SENSOR_AGARRE].pin           = PIN_SENSOR_AGARRE;
-  sensores[SENSOR_AGARRE].estado        = ESTADO_SENSOR_OK;
-  
-  // Inicializo el evento inicial
-  current_state = ST_RUNNING;
-  
-  timeout = false;
-  lct     = millis();
-
-  init_(); //Revisar si esto va aca
-}
-//----------------------------------------------
 
 
 //----------------------------------------------
@@ -150,7 +132,7 @@ void leerSensorAgarre( ){
     }
     else
     {
-        agarre = 0
+        agarre = 0;
     }
 
 }
@@ -173,7 +155,7 @@ void encender_buzzer( )
 void actualizar_motor( )
 {
   dutyCicle = byte - distancia;
-  analogWrite(pinMotor, dutyCicle);
+  analogWrite(PIN_MOTOR, dutyCicle);
 }
 //----------------------------------------------
 
@@ -187,8 +169,8 @@ bool verificarEstadoSensorProximidad( )
   leerSensorProximidad();
   sensores[SENSOR_PROXIMIDAD].valor_actual = distancia;
   
-  int valor_actual = sensores[SENSOR_TEMPERATURA].valor_actual;
-  int valor_previo = sensores[SENSOR_TEMPERATURA].valor_previo;
+  int valor_actual = sensores[SENSOR_PROXIMIDAD].valor_actual;
+  int valor_previo = sensores[SENSOR_PROXIMIDAD].valor_previo;
   
   if( valor_actual != valor_previo )
   {
@@ -310,7 +292,7 @@ void state_machine_proyecto_baston( )
       DebugPrintEstado(states_s[current_state], events_s[new_event]);
     }
     
-    state_table[current_state][new_event]();
+    state_table_actions[current_state][new_event]();
   }
   else
   {
@@ -318,7 +300,7 @@ void state_machine_proyecto_baston( )
   }
   
   // Consumo el evento...
-  new_event   = EV_CONT; //IGUAL LINEA 296
+  //new_event   = EV_CONT; //IGUAL LINEA 296
 }
 //----------------------------------------------
 
@@ -327,7 +309,25 @@ void state_machine_proyecto_baston( )
 //----------------------------------------------
 void setup()
 {
-  do_init();
+   Serial.begin(9600);
+  
+  pinMode(PIN_SENSOR_PROXIMIDAD_ECHO, INPUT); //echo es de entrada
+  pinMode(PIN_SENSOR_PROXIMIDAD_TRIGGER, OUTPUT); //trigger es de salida
+  pinMode(PIN_MOTOR, OUTPUT); //motor es de salida
+//   pinMode(PIN_SENSOR_AGARRE, INPUT); //agarre es de entrada
+  pinMode(PIN_BUZZER, OUTPUT); //buzzer es de salida
+
+  sensores[SENSOR_PROXIMIDAD].pin    = PIN_SENSOR_PROXIMIDAD_ECHO;
+  sensores[SENSOR_PROXIMIDAD].estado = ESTADO_SENSOR_OK;
+
+  sensores[SENSOR_AGARRE].pin           = PIN_SENSOR_AGARRE;
+  sensores[SENSOR_AGARRE].estado        = ESTADO_SENSOR_OK;
+  
+  // Inicializo el evento inicial
+  current_state = ST_RUNNING;
+  
+  timeout = false;
+  lct     = millis();
 }
 //----------------------------------------------
 
